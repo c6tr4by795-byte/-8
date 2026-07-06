@@ -1,0 +1,136 @@
+/* ==========================================================================
+   Iraq Green — Login Screen Logic
+   ========================================================================== */
+
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('loginForm');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const emailError = document.getElementById('emailError');
+  const passwordError = document.getElementById('passwordError');
+  const loginBtn = document.getElementById('loginBtn');
+  const googleBtn = document.getElementById('googleBtn');
+  const togglePasswordBtn = document.getElementById('togglePassword');
+  const toast = document.getElementById('toast');
+  const card = document.getElementById('loginCard');
+
+  /* ------------------------------------------------------------------
+     Toggle password visibility
+     ------------------------------------------------------------------ */
+  togglePasswordBtn.addEventListener('click', () => {
+    const isPassword = passwordInput.type === 'password';
+    passwordInput.type = isPassword ? 'text' : 'password';
+    togglePasswordBtn.classList.toggle('is-visible', isPassword);
+    togglePasswordBtn.setAttribute(
+      'aria-label',
+      isPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'
+    );
+  });
+
+  /* ------------------------------------------------------------------
+     Helpers
+     ------------------------------------------------------------------ */
+  function showToast(message, type = 'success') {
+    toast.textContent = message;
+    toast.className = `toast show ${type}`;
+    window.clearTimeout(showToast._timer);
+    showToast._timer = window.setTimeout(() => {
+      toast.classList.remove('show');
+    }, 2800);
+  }
+
+  function isValidEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  function setFieldError(inputEl, errorEl, message) {
+    errorEl.textContent = message;
+    inputEl.setAttribute('aria-invalid', message ? 'true' : 'false');
+  }
+
+  function shakeCard() {
+    card.classList.remove('shake');
+    // Force reflow so the animation can retrigger
+    void card.offsetWidth;
+    card.classList.add('shake');
+  }
+
+  function setButtonLoading(button, isLoading) {
+    button.classList.toggle('is-loading', isLoading);
+    button.disabled = isLoading;
+  }
+
+  /* ------------------------------------------------------------------
+     Live validation
+     ------------------------------------------------------------------ */
+  emailInput.addEventListener('input', () => {
+    if (emailInput.value.length === 0 || isValidEmail(emailInput.value)) {
+      setFieldError(emailInput, emailError, '');
+    }
+  });
+
+  passwordInput.addEventListener('input', () => {
+    if (passwordInput.value.length === 0 || passwordInput.value.length >= 6) {
+      setFieldError(passwordInput, passwordError, '');
+    }
+  });
+
+  /* ------------------------------------------------------------------
+     Form submit
+     ------------------------------------------------------------------ */
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    let hasError = false;
+
+    if (!email) {
+      setFieldError(emailInput, emailError, 'الرجاء إدخال البريد الإلكتروني');
+      hasError = true;
+    } else if (!isValidEmail(email)) {
+      setFieldError(emailInput, emailError, 'صيغة البريد الإلكتروني غير صحيحة');
+      hasError = true;
+    } else {
+      setFieldError(emailInput, emailError, '');
+    }
+
+    if (!password) {
+      setFieldError(passwordInput, passwordError, 'الرجاء إدخال كلمة المرور');
+      hasError = true;
+    } else if (password.length < 6) {
+      setFieldError(passwordInput, passwordError, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+      hasError = true;
+    } else {
+      setFieldError(passwordInput, passwordError, '');
+    }
+
+    if (hasError) {
+      shakeCard();
+      return;
+    }
+
+    setButtonLoading(loginBtn, true);
+
+    // Simulate an authentication request.
+    // Replace this block with a real API call when wiring up a backend.
+    window.setTimeout(() => {
+      setButtonLoading(loginBtn, false);
+      showToast('تم تسجيل الدخول بنجاح', 'success');
+      form.reset();
+    }, 1600);
+  });
+
+  /* ------------------------------------------------------------------
+     Google sign-in (placeholder flow)
+     ------------------------------------------------------------------ */
+  googleBtn.addEventListener('click', () => {
+    setButtonLoading(googleBtn, true);
+
+    // Replace this block with real Google OAuth logic when integrating.
+    window.setTimeout(() => {
+      setButtonLoading(googleBtn, false);
+      showToast('جاري التوجيه إلى تسجيل الدخول عبر Google', 'success');
+    }, 1400);
+  });
+});
